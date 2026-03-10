@@ -1,43 +1,54 @@
-# OpenClaw Uninstall Skill
+---
+name: openclaw-uninstall
+description: |
+  Cross-platform uninstall script for OpenClaw. Completely removes OpenClaw CLI and all residual files.
+  Use when: (1) User wants to completely remove OpenClaw, (2) Cleaning up OpenClaw installation,
+  (3) Uninstalling OpenClaw CLI (npm/pnpm/bun), (4) Removing OpenClaw desktop app (macOS),
+  (5) Cleaning all OpenClaw data directories and config files.
+---
 
-This skill allows OpenClaw to uninstall itself completely.
+# OpenClaw Uninstall
 
-## Description
+Downloads and executes the uninstall script to completely remove OpenClaw from the system.
 
-Completely removes OpenClaw CLI and all residual files from the system. Supports macOS, Linux, and Windows.
-
-## Tools Used
-
-- `exec`: Download and execute the uninstall script
-
-## How It Works
-
-1. Downloads the uninstall script from GitHub
-2. Executes it with appropriate permissions
-3. The script handles all cleanup and self-deletion
-
-## Usage
+## Quick Start
 
 ```bash
-# Download and run the uninstall script
 curl -fsSL https://raw.githubusercontent.com/billLiao/openclaw-uninstall/main/uninstall.sh | bash
 ```
 
-Or as a skill in OpenClaw:
-
-```
-User: Uninstall OpenClaw
-Agent: Downloads and runs the uninstall script
+Or run locally after downloading:
+```bash
+chmod +x uninstall.sh && ./uninstall.sh
 ```
 
 ## What Gets Removed
 
-- OpenClaw CLI (npm/pnpm/bun)
-- All configuration files
-- All workspace data
-- All state files
-- macOS desktop app (if installed)
-- LaunchAgent (if installed)
+### CLI (auto-detected)
+- npm: `npm uninstall -g openclaw`
+- pnpm: `pnpm remove -g openclaw`
+- bun: `bun pm rm -g openclaw`
+
+### Data Directories
+- `~/.openclaw`
+- `~/.config/openclaw`
+- `~/.local/share/openclaw`
+- `~/openclaw-workspace`
+
+### Config Files
+- `~/.openclawrc`
+- `~/.openclaw-config`
+- `~/.openclaw.json`
+
+### macOS Specific
+- `/Applications/OpenClaw.app`
+- `~/Library/LaunchAgents/com.openclaw.daemon.plist`
+
+## Platform Support
+
+- **macOS**: Full support (CLI + app + LaunchAgent)
+- **Linux**: Full support (CLI + data directories)
+- **Windows**: Full support via `uninstall.bat`
 
 ## Warning
 
