@@ -1,0 +1,10 @@
+# openclaw-uninstall
+
+# Ignore all files
+*
+# But keep these
+!.gitignore
+!README.md
+!uninstall.sh
+!uninstall.bat
+!SKILL.md
