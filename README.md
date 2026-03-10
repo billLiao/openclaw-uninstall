@@ -25,11 +25,19 @@ chmod +x uninstall.sh
 ./uninstall.sh
 ```
 
-### Windows
+### Windows (CMD)
 
 ```cmd
-# Run as Administrator
+# Download and run
+curl -fsSL https://raw.githubusercontent.com/billLiao/openclaw-uninstall/main/uninstall.bat -o uninstall.bat
 uninstall.bat
+```
+
+### Windows (PowerShell)
+
+```powershell
+# Download and run (PowerShell 5.1+)
+irm https://raw.githubusercontent.com/billLiao/openclaw-uninstall/main/uninstall.ps1 | iex
 ```
 
 ## What Gets Removed

@@ -46,9 +46,17 @@ chmod +x uninstall.sh && ./uninstall.sh
 
 ## Platform Support
 
+| Platform | Script | Command |
+|----------|--------|---------|
+| Linux / macOS / WSL / MCP | `.sh` | `curl -fsSL https://raw.githubusercontent.com/billLiao/openclaw-uninstall/main/uninstall.sh \| bash` |
+| Windows (CMD) | `.bat` | `curl -fsSL https://raw.githubusercontent.com/billLiao/openclaw-uninstall/main/uninstall.bat -o uninstall.bat && uninstall.bat` |
+| Windows (PowerShell) | `.ps1` | `irm https://raw.githubusercontent.com/billLiao/openclaw-uninstall/main/uninstall.ps1 \| iex` |
+
+### Platform Details
 - **macOS**: Full support (CLI + app + LaunchAgent)
 - **Linux**: Full support (CLI + data directories)
-- **Windows**: Full support via `uninstall.bat`
+- **Windows CMD**: Use `uninstall.bat`
+- **Windows PowerShell**: Use `uninstall.ps1`
 
 ## Warning
 
