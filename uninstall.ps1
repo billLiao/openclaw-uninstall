@@ -1,23 +1,26 @@
-# OpenClaw Uninstall Script for Windows PowerShell
+# OpenClaw/MoltBot/ClawDBot Uninstall Script for Windows PowerShell
 # Supports: Windows 10/11 (PowerShell 5.1+)
 
 $ErrorActionPreference = "SilentlyContinue"
+
+# Supported tool names
+$ToolNames = @("openclaw", "moltbot", "clawdbot", "clawdbot-cn")
 
 # Colors
 function Write-ColorOutput {
     param([string]$Message, [string]$Color = "White")
     $colors = @{
-        "Red"     = "`e[91m"
-        "Green"   = "`e[92m"
-        "Yellow"  = "`e[93m"
-        "Blue"    = "`e[94m"
-        "Reset"   = "`e[0m"
+        "Red" = "`e[91m"
+        "Green" = "`e[92m"
+        "Yellow" = "`e[93m"
+        "Blue" = "`e[94m"
+        "Reset" = "`e[0m"
     }
     Write-Host "$($colors[$Color])$Message$($colors['Reset'])"
 }
 
 Write-ColorOutput "========================================" "Blue"
-Write-ColorOutput " OpenClaw Uninstall Script (PowerShell)" "Blue"
+Write-ColorOutput " OpenClaw/MoltBot/ClawDBot Uninstall" "Blue"
 Write-ColorOutput "========================================" "Blue"
 Write-Host ""
 
@@ -27,27 +30,43 @@ if (Get-Command npm -ErrorAction SilentlyContinue) { $PM = "npm" }
 elseif (Get-Command pnpm -ErrorAction SilentlyContinue) { $PM = "pnpm" }
 elseif (Get-Command bun -ErrorAction SilentlyContinue) { $PM = "bun" }
 
-# Check if OpenClaw is installed
+# Check if any supported tool is installed
 $INSTALLED = $false
-if (Get-Command openclaw -ErrorAction SilentlyContinue) { $INSTALLED = $true }
+$INSTALLED_TOOL = ""
+foreach ($tool in $ToolNames) {
+    if (Get-Command $tool -ErrorAction SilentlyContinue) {
+        $INSTALLED = $true
+        $INSTALLED_TOOL = $tool
+        break
+    }
+}
 
 Write-Host "OS: Windows (PowerShell)"
 Write-Host "Package Manager: $PM"
-Write-Host "OpenClaw Installed: $INSTALLED"
+Write-Host "Tool Installed: $INSTALLED"
+if ($INSTALLED) {
+    Write-Host "Installed Tool: $INSTALLED_TOOL"
+}
 Write-Host ""
 
 if (-not $INSTALLED) {
-    Write-ColorOutput "OpenClaw is not installed. Cleaning up residual files..." "Yellow"
+    Write-ColorOutput "No supported tool is installed. Cleaning up residual files..." "Yellow"
 } else {
-    Write-ColorOutput "Uninstalling OpenClaw via $PM..." "Blue"
-    
+    Write-ColorOutput "Uninstalling $INSTALLED_TOOL via $PM..." "Blue"
+
     switch ($PM) {
-        "npm"  { npm uninstall -g openclaw }
-        "pnpm" { pnpm remove -g openclaw }
-        "bun"  { bun pm rm -g openclaw }
+        "npm" { 
+            foreach ($tool in $ToolNames) { npm uninstall -g $tool }
+        }
+        "pnpm" { 
+            foreach ($tool in $ToolNames) { pnpm remove -g $tool }
+        }
+        "bun" { 
+            foreach ($tool in $ToolNames) { bun pm rm -g $tool }
+        }
     }
-    
-    Write-ColorOutput "OpenClaw CLI uninstalled." "Green"
+
+    Write-ColorOutput "CLI uninstalled." "Green"
 }
 
 # Clean data directories
@@ -57,12 +76,13 @@ $userProfile = $env:USERPROFILE
 $appData = $env:APPDATA
 $localAppData = $env:LOCALAPPDATA
 
-$dirsToRemove = @(
-    "$userProfile\.openclaw",
-    "$appData\openclaw",
-    "$localAppData\openclaw",
-    "$userProfile\openclaw-workspace"
-)
+$dirsToRemove = @()
+foreach ($tool in $ToolNames) {
+    $dirsToRemove += "$userProfile\.$tool"
+    $dirsToRemove += "$appData\$tool"
+    $dirsToRemove += "$localAppData\$tool"
+    $dirsToRemove += "$userProfile\${tool}-workspace"
+}
 
 foreach ($dir in $dirsToRemove) {
     if (Test-Path $dir) {
@@ -75,11 +95,13 @@ foreach ($dir in $dirsToRemove) {
 # Clean config files
 Write-ColorOutput "Cleaning config files..." "Blue"
 
-$filesToRemove = @(
-    "$userProfile\.openclawrc",
-    "$userProfile\.openclaw-config",
-    "$userProfile\.openclaw.json"
-)
+$filesToRemove = @()
+foreach ($tool in $ToolNames) {
+    $toolConfig = $tool -replace '-', '_'
+    $filesToRemove += "$userProfile\.${tool}rc"
+    $filesToRemove += "$userProfile\.${tool}-config"
+    $filesToRemove += "$userProfile\.${tool}.json"
+}
 
 foreach ($file in $filesToRemove) {
     if (Test-Path $file) {
@@ -93,16 +115,16 @@ foreach ($file in $filesToRemove) {
 if ($PM -ne "none") {
     Write-ColorOutput "Cleaning $PM cache..." "Blue"
     switch ($PM) {
-        "npm"  { npm cache clean --force }
+        "npm" { npm cache clean --force }
         "pnpm" { pnpm store prune }
-        "bun"  { bun pm cache rm }
+        "bun" { bun pm cache rm }
     }
     Write-ColorOutput "✓ Cache cleaned" "Green"
 }
 
 Write-Host ""
 Write-ColorOutput "========================================" "Green"
-Write-ColorOutput " OpenClaw uninstallation complete!" "Green"
+Write-ColorOutput " Uninstallation complete!" "Green"
 Write-ColorOutput "========================================" "Green"
 Write-Host ""
 
