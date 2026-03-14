@@ -1,26 +1,26 @@
 # openclaw-uninstall
 
-A cross-platform uninstall script for OpenClaw that completely removes OpenClaw CLI and all residual files.
+跨平台 OpenClaw 完全卸载工具，一键清理 CLI 及所有残留文件。
 
-## Features
+## 功能特性
 
-- ✅ **Cross-platform**: macOS, Linux, Windows (WSL/Cygwin)
-- ✅ **Auto-detection**: Automatically detects CLI installation
-- ✅ **Smart path selection**: Intelligently finds all installation paths
-- ✅ **Clean all residues**: Removes state, config, workspace, multi-profile data
-- ✅ **Uninstall CLI**: Supports npm, pnpm, bun
-- ✅ **macOS app removal**: Removes desktop app and LaunchAgent
-- ✅ **Self-destruct**: Script deletes itself after execution
+- ✅ **跨平台支持**：macOS、Linux、Windows (WSL/Cygwin)
+- ✅ **自动检测**：智能识别 CLI 安装方式
+- ✅ **智能路径**：自动查找所有安装路径
+- ✅ **彻底清理**：移除状态、配置、工作区、多配置文件数据
+- ✅ **卸载 CLI**：支持 npm、pnpm、bun
+- ✅ **macOS 清理**：移除桌面应用和 LaunchAgent
+- ✅ **自毁机制**：执行完毕后自动删除脚本，不留痕迹
 
-## Usage
+## 使用方法
 
-### Unix-like (macOS/Linux)
+### Unix 系统（macOS/Linux）
 
 ```bash
-# Download and run
+# 下载并执行
 curl -fsSL https://raw.githubusercontent.com/billLiao/openclaw-uninstall/main/uninstall.sh | bash
 
-# Or run locally
+# 或本地执行
 chmod +x uninstall.sh
 ./uninstall.sh
 ```
@@ -28,7 +28,7 @@ chmod +x uninstall.sh
 ### Windows (CMD)
 
 ```cmd
-# Download and run
+# 下载并执行
 curl -fsSL https://raw.githubusercontent.com/billLiao/openclaw-uninstall/main/uninstall.bat -o uninstall.bat
 uninstall.bat
 ```
@@ -36,45 +36,45 @@ uninstall.bat
 ### Windows (PowerShell)
 
 ```powershell
-# Download and run (PowerShell 5.1+)
+# 下载并执行（PowerShell 5.1+）
 irm https://raw.githubusercontent.com/billLiao/openclaw-uninstall/main/uninstall.ps1 | iex
 ```
 
-## What Gets Removed
+## 清理内容
 
-### CLI
-- npm global: `npm uninstall -g openclaw`
-- pnpm global: `pnpm remove -g openclaw`
-- bun global: `bun pm rm -g openclaw`
+### CLI 卸载
+- npm 全局：`npm uninstall -g openclaw`
+- pnpm 全局：`pnpm remove -g openclaw`
+- bun 全局：`bun pm rm -g openclaw`
 
-### Data Directories
+### 数据目录
 - `~/.openclaw`
 - `~/.config/openclaw`
 - `~/.local/share/openclaw`
 - `~/openclaw-workspace`
 
-### Config Files
+### 配置文件
 - `~/.openclawrc`
 - `~/.openclaw-config`
 - `~/.openclaw.json`
 
-### macOS Specific
+### macOS 特有
 - `/Applications/OpenClaw.app`
 - `~/Library/LaunchAgents/com.openclaw.daemon.plist`
 
-## As OpenClaw Skill
+## 作为 OpenClaw Skill 使用
 
-You can also use this as an OpenClaw skill to uninstall OpenClaw from within itself:
+你也可以将此脚本作为 OpenClaw Skill 来使用，从内部卸载 OpenClaw：
 
 ```bash
-# Download the script to your workspace
+# 将脚本下载到工作区
 curl -fsSL https://raw.githubusercontent.com/billLiao/openclaw-uninstall/main/uninstall.sh -o ~/.openclaw/uninstall.sh
 chmod +x ~/.openclaw/uninstall.sh
 
-# Run it
+# 执行卸载
 ~/.openclaw/uninstall.sh
 ```
 
-## License
+## 许可证
 
 MIT
