@@ -6,6 +6,7 @@
 # But keep these
 !.gitignore
 !README.md
+!README-en.md
 !uninstall.sh
 !uninstall.bat
 !uninstall.ps1
