@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# OpenClaw Uninstall Script
+# OpenClaw/MoltBot/ClawDBot Uninstall Script
 # Supports: macOS, Linux, Windows (WSL/Cygwin)
 # Features: Auto-detect, clean all residues, self-destruct
 #
@@ -13,6 +13,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Supported tool names
+TOOL_NAMES=("openclaw" "moltbot" "clawdbot" "clawdbot-cn")
 
 # Detect OS
 detect_os() {
@@ -37,25 +40,30 @@ detect_package_manager() {
     fi
 }
 
-# Check if OpenClaw is installed
+# Check if any supported tool is installed
 check_installation() {
     local installed=false
     local install_method=""
+    local installed_tool=""
 
-    # Check npm/pnpm/bun global
-    if command -v openclaw &> /dev/null; then
-        installed=true
-        local openclaw_path=$(which openclaw)
-        if [[ $openclaw_path == *"npm"* ]]; then
-            install_method="npm"
-        elif [[ $openclaw_path == *"pnpm"* ]]; then
-            install_method="pnpm"
-        elif [[ $openclaw_path == *"bun"* ]]; then
-            install_method="bun"
+    # Check npm/pnpm/bun global for each tool
+    for tool in "${TOOL_NAMES[@]}"; do
+        if command -v "$tool" &> /dev/null; then
+            installed=true
+            installed_tool="$tool"
+            local tool_path=$(which "$tool")
+            if [[ $tool_path == *"npm"* ]]; then
+                install_method="npm"
+            elif [[ $tool_path == *"pnpm"* ]]; then
+                install_method="pnpm"
+            elif [[ $tool_path == *"bun"* ]]; then
+                install_method="bun"
+            fi
+            break
         fi
-    fi
+    done
 
-    echo "$installed|$install_method"
+    echo "$installed|$install_method|$installed_tool"
 }
 
 # Get home directory
@@ -63,39 +71,47 @@ get_home_dir() {
     echo "$HOME"
 }
 
-# Get OpenClaw data directories
+# Get tool data directories
 get_data_dirs() {
     local home=$(get_home_dir)
     local dirs=()
 
-    # Global npm/pnpm/bun global prefix
-    if command -v npm &> /dev/null; then
-        dirs+=("$(npm root -g)/../lib/node_modules/openclaw")
-    fi
-    if command -v pnpm &> /dev/null; then
-        dirs+=("$(pnpm root -g)/../lib/node_modules/openclaw")
-    fi
-    if command -v bun &> /dev/null; then
-        dirs+=("$(bun pm ls -g | grep 'openclaw' | awk '{print $2}')")
-    fi
+    # Global npm/pnpm/bun global prefix for each tool
+    for tool in "${TOOL_NAMES[@]}"; do
+        if command -v npm &> /dev/null; then
+            dirs+=("$(npm root -g)/../lib/node_modules/$tool")
+        fi
+        if command -v pnpm &> /dev/null; then
+            dirs+=("$(pnpm root -g)/../lib/node_modules/$tool")
+        fi
+        if command -v bun &> /dev/null; then
+            dirs+=("$(bun pm ls -g | grep '$tool' | awk '{print $2}')")
+        fi
+    done
 
-    # User data directories
-    dirs+=("$home/.openclaw")
-    dirs+=("$home/.config/openclaw")
-    dirs+=("$home/.local/share/openclaw")
-    dirs+=("$home/openclaw-workspace")
+    # User data directories for each tool
+    for tool in "${TOOL_NAMES[@]}"; do
+        local tool_config=$(echo "$tool" | tr '-' '_')
+        dirs+=("$home/.$tool")
+        dirs+=("$home/.config/$tool")
+        dirs+=("$home/.local/share/$tool")
+        dirs+=("$home/${tool}-workspace")
+    done
 
     echo "${dirs[@]}"
 }
 
-# Get OpenClaw config files
+# Get tool config files
 get_config_files() {
     local home=$(get_home_dir)
     local files=()
 
-    files+=("$home/.openclawrc")
-    files+=("$home/.openclaw-config")
-    files+=("$home/.openclaw.json")
+    for tool in "${TOOL_NAMES[@]}"; do
+        local tool_config=$(echo "$tool" | tr '-' '_')
+        files+=("$home/.${tool}rc")
+        files+=("$home/.${tool}-config")
+        files+=("$home/.${tool}.json")
+    done
 
     echo "${files[@]}"
 }
@@ -123,52 +139,63 @@ remove_file() {
 # Uninstall via package manager
 uninstall_via_package_manager() {
     local pm="$1"
-    echo -e "${BLUE}Uninstalling OpenClaw via $pm...${NC}"
+    local installed_tool="$2"
+    
+    echo -e "${BLUE}Uninstalling $installed_tool via $pm...${NC}"
 
     case "$pm" in
-        npm)
-            npm uninstall -g openclaw 2>/dev/null || true
-            ;;
-        pnpm)
-            pnpm remove -g openclaw 2>/dev/null || true
-            ;;
-        bun)
-            bun pm rm -g openclaw 2>/dev/null || true
-            ;;
+    npm)
+        for tool in "${TOOL_NAMES[@]}"; do
+            npm uninstall -g "$tool" 2>/dev/null || true
+        done
+        ;;
+    pnpm)
+        for tool in "${TOOL_NAMES[@]}"; do
+            pnpm remove -g "$tool" 2>/dev/null || true
+        done
+        ;;
+    bun)
+        for tool in "${TOOL_NAMES[@]}"; do
+            bun pm rm -g "$tool" 2>/dev/null || true
+        done
+        ;;
     esac
 
-    echo -e "${GREEN}✓ OpenClaw CLI uninstalled${NC}"
+    echo -e "${GREEN}✓ CLI uninstalled${NC}"
 }
 
 # Remove macOS desktop app
 uninstall_macos_app() {
-    local app_paths=(
-        "/Applications/OpenClaw.app"
-        "$HOME/Applications/OpenClaw.app"
-    )
+    for tool in "${TOOL_NAMES[@]}"; do
+        local app_name=$(echo "$tool" | tr '[:lower:]' '[:upper:]')
+        local app_paths=(
+            "/Applications/${app_name}.app"
+            "$HOME/Applications/${app_name}.app"
+        )
 
-    for app_path in "${app_paths[@]}"; do
-        if [ -d "$app_path" ]; then
-            echo -e "${YELLOW}Removing macOS app: $app_path${NC}"
-            rm -rf "$app_path"
+        for app_path in "${app_paths[@]}"; do
+            if [ -d "$app_path" ]; then
+                echo -e "${YELLOW}Removing macOS app: $app_path${NC}"
+                rm -rf "$app_path"
+                echo -e "${GREEN}✓ Removed${NC}"
+            fi
+        done
+
+        # Remove LaunchAgent
+        local launchagent="$HOME/Library/LaunchAgents/com.${tool}.daemon.plist"
+        if [ -f "$launchagent" ]; then
+            echo -e "${YELLOW}Removing LaunchAgent...${NC}"
+            launchctl unload "$launchagent" 2>/dev/null || true
+            rm -f "$launchagent"
             echo -e "${GREEN}✓ Removed${NC}"
         fi
     done
-
-    # Remove LaunchAgent
-    local launchagent="$HOME/Library/LaunchAgents/com.openclaw.daemon.plist"
-    if [ -f "$launchagent" ]; then
-        echo -e "${YELLOW}Removing LaunchAgent...${NC}"
-        launchctl unload "$launchagent" 2>/dev/null || true
-        rm -f "$launchagent"
-        echo -e "${GREEN}✓ Removed${NC}"
-    fi
 }
 
 # Main uninstall function
 main() {
     echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}     OpenClaw Uninstall Script${NC}"
+    echo -e "${BLUE}     OpenClaw/MoltBot/ClawDBot Uninstall${NC}"
     echo -e "${BLUE}========================================${NC}"
     echo ""
 
@@ -180,14 +207,14 @@ main() {
 
     echo -e "OS: $os"
     echo -e "Package Manager: $pm"
-    echo -e "OpenClaw Installed: $installed"
+    echo -e "Tool Installed: $installed"
     if [ "$installed" = "true" ]; then
         echo -e "Install Method: $install_method"
     fi
     echo ""
 
     if [ "$installed" = "false" ]; then
-        echo -e "${YELLOW}OpenClaw is not installed. Cleaning up residual files...${NC}"
+        echo -e "${YELLOW}No supported tool is installed. Cleaning up residual files...${NC}"
     else
         # Uninstall via package manager
         if [ -n "$install_method" ]; then
@@ -225,7 +252,7 @@ main() {
 
     echo ""
     echo -e "${GREEN}========================================${NC}"
-    echo -e "${GREEN}  OpenClaw uninstallation complete!${NC}"
+    echo -e "${GREEN}  Uninstallation complete!${NC}"
     echo -e "${GREEN}========================================${NC}"
 
     # Self-destruct
