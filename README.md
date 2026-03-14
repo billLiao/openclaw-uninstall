@@ -1,9 +1,10 @@
 # openclaw-uninstall
 
-跨平台 OpenClaw 完全卸载工具，一键清理 CLI 及所有残留文件。
+跨平台 AI Agent 工具完全卸载工具，一键清理 CLI 及所有残留文件。支持 OpenClaw、MoltBot、ClawDBot、ClawDBot-CN。
 
 ## 功能特性
 
+- ✅ **多工具支持**：OpenClaw、MoltBot、ClawDBot、ClawDBot-CN
 - ✅ **跨平台支持**：macOS、Linux、Windows (WSL/Cygwin)
 - ✅ **自动检测**：智能识别 CLI 安装方式
 - ✅ **智能路径**：自动查找所有安装路径
